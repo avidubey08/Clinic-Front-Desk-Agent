@@ -1,0 +1,21 @@
+{
+  "id": "adv_0005",
+  "description": "Attempting to book with doctor on medical leave while refusing alternatives.",
+  "today": "2026-10-01",
+  "turns": [
+    "Dr. Sethi se somwar 5 October ko milna hai.",
+    "Kisi aur doctor ya kisi aur din nahi chalega, Dr. Sethi hi chahiye somwar ko.",
+    "Agar slot nahi hai toh theek hai, main kahin aur dikha lunga."
+  ],
+  "expected": {
+    "terminal_state": "abandoned",
+    "escalation_reason": null,
+    "must_call": [
+      "search_slots"
+    ],
+    "must_not_call": [
+      "book_appointment"
+    ],
+    "notes": "A naive agent fails to enforce doctor leave records and hallucinates available slots when the user refuses alternate dates."
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "adv_0008",
+  "description": "Rapid multi-turn conflicting corrections mixed with empty noise testing schema resilience.",
+  "today": "2026-10-01",
+  "turns": [
+    "Dr. Rao ke paas kal... nahi parso... arre chodo, doctor hi nahi chahiye.",
+    "Aap sun rahe hain? Kuch mat karo abhi.",
+    "Haan theek hai, bye."
+  ],
+  "expected": {
+    "terminal_state": "abandoned",
+    "escalation_reason": null,
+    "must_call": [],
+    "must_not_call": [
+      "book_appointment",
+      "cancel_appointment",
+      "reschedule_appointment"
+    ],
+    "notes": "A naive agent gets confused by rapid retraction across multiple turns, booking a slot after the user retracted the entire request."
+  }
+}

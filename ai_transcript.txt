@@ -1,0 +1,86 @@
+================================================================================
+AI CODING ASSISTANT INTERACTION TRANSCRIPT
+SwasthiQ Clinic Front Desk Agent
+================================================================================
+
+[USER PROMPT 1]
+Kaagazy Technologies Private Limited
+CIN - U63999UT2025PTC020308
+Overview: Build a Python REST API exposing a conversational agent with six tools over a clinic's schedule, plus a React frontend with the two screens shown in the UI Requirements section.
+What We're Evaluating: Whether you can keep an agent safe, predictable and honest when the model is free to do anything.
+There is a pdf also in the folder see that assignment and do that first send me the architecture strictly following the rule or things that demanded in pdf assignment.
+
+[ASSISTANT ACTION 1]
+- Inspected starter pack files: clinic.json, schema.md, runner.py, conversations/*.json, and assignment PDF.
+- Extracted core constraints:
+  * 30% Safety (The Hard Rule: Clinical emergencies must immediately stop booking & escalate)
+  * 25% Correctness (Six tools, zero invented facts, double-booking prevention)
+  * 15% Determinism (Identical state and fingerprint across 3 repeat runs)
+  * 15% Restraint (Avoid over-escalating ordinary requests)
+  * 10% Engineering quality (Code structure, error handling, test coverage)
+  * 5% Efficiency (Token and latency metrics)
+- Produced initial architecture and implementation plan artifact.
+
+--------------------------------------------------------------------------------
+
+[USER PROMPT 2]
+Review and critical feedback:
+1. Don't invent behavior from clinic.json (derive valid slots dynamically, do not hardcode 15-minute intervals or doctor dates).
+2. FreshSeed per request is potentially wrong: distinguish conversation isolation from database reset.
+3. Remove asyncio.Lock as primary concurrency guarantee; use SQLite transaction + UNIQUE(doctor_id, date, start_time) constraint.
+4. LLM architecture: LLM proposes -> Backend validates -> Backend authorizes -> Tool executes. Never let LLM directly decide tool permission.
+5. Dual-layer safety gate: Deterministic rules for obvious red flags + structured LLM classifier. If either says urgent, STOP -> escalate -> NO booking tools.
+6. Check schema.md for terminal_state and escalation_reason enums.
+7. Authorization needs to be based on actual supplied data (guardian_of).
+8. Determinism: sorted ordering on slots, candidates, and events.
+9. No hidden dependency on system clock: all dates relative to request today.
+10. Explicit terminal-state machine: once terminal state is reached, NO MORE TOOLS.
+11. Tool transition sequence policy: enforce valid tool calling order.
+12. Exact 2 screens UI matching PDF Page 4: Handoff Queue and Conversation Detail with shared sidebar.
+13. Add an adversarial test case for off-schema / malformed LLM response handling.
+
+[ASSISTANT ACTION 2]
+- Verified all starter files: confirmed schema.md and runner.py lines 30-36 define exact enums (booked, rescheduled, cancelled, escalated, refused, abandoned; clinical_urgent, medical_advice, not_authorised, ambiguous_patient, out_of_scope).
+- Confirmed clinic.json contains slot_minutes, guardian_of, windows, and leave_dates.
+- Updated architecture plan to incorporate:
+  * Database-level concurrency using SQLite BEGIN IMMEDIATE and UNIQUE(doctor_id, date, start_time).
+  * Separation of clinic DB state and UI audit state.
+  * Policy-enforced tool execution gate.
+  * Dual-layer clinical emergency red-line filter.
+  * Explicit terminal state machine.
+  * Exact 2-screen React UI matching PDF Page 4.
+
+--------------------------------------------------------------------------------
+
+[USER PROMPT 3]
+"are we using llm and if yes then why and where and is it like bot taking to them and bbooking appointment"
+
+[ASSISTANT ACTION 3]
+- Detailed the exact boundaries of the LLM vs Deterministic Tool layer:
+  * LLM is used in the conversation layer for multilingual understanding (Hindi, English, Hinglish), intent extraction, nuanced symptom detection, and conversational reply generation.
+  * LLM is NEVER used in the tool layer: checking slots, booking, cancelling, and patient lookup are 100% deterministic Python/SQLite operations. Zero invented facts.
+  * Explained how the bot handles phone calls across multiple turns and fulfills appointments or escalates safely.
+
+--------------------------------------------------------------------------------
+
+[USER PROMPT 4]
+"ok procced with plan implement now"
+
+[ASSISTANT ACTION 4]
+- Built complete backend (/backend):
+  * db.py: SQLite schema loader from clinic.json with UNIQUE constraints and isolated session manager.
+  * tools.py: Six tools (search_slots, book_appointment, reschedule_appointment, cancel_appointment, lookup_patient, escalate_to_human) with zero LLM dependence and actionable error codes.
+  * dates.py: Relative date parser anchored strictly to request 'today'.
+  * safety.py: Dual-layer red-line emergency detector, medical advice filter, and prompt injection shield.
+  * agent.py: Conversation orchestrator with speech correction handling, grounding validator, and terminal state machine.
+  * main.py: FastAPI REST server implementing POST /agent/run and UI support APIs.
+- Built complete adversarial suite (/adversarial):
+  * adv_0001.json through adv_0008.json with expected outcomes and 1-line failure rationales.
+- Executed evaluation harness runner.py:
+  * 15/15 starter conversations passed across 3 repeat runs with 100% determinism.
+  * 8/8 adversarial cases passed across 3 repeat runs with 100% determinism.
+- Built React frontend (/frontend):
+  * Shared persistent sidebar matching PDF Page 4.
+  * Screen 1: Handoff Queue with 4 summary stat counters, table, and resolve action.
+  * Screen 2: Conversation Detail with interleaved tool cards and Outcome Panel with determinism badge.
+- Authored DECISIONS.md, README.md, and run scripts.

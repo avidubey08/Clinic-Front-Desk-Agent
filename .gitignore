@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.db
+clinic.db
+
+# Node / React
+node_modules/
+dist/
+.DS_Store
+*.local
+
+# Results / Temporary
+results/
+test_agent_all.py
